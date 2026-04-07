@@ -302,6 +302,7 @@ if run_btn:
                 raw_text = file.read().decode("utf-8", errors="ignore")
 
             if not raw_text.strip():
+                st.warning(f"⚠️ **{file.name}** — could not extract text. This is likely a scanned/image PDF. Please export it as a text-based PDF from Word/Google Docs and re-upload.")
                 continue
 
             # Parse + score

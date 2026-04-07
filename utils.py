@@ -1,70 +1,73 @@
 """
 utils.py  –  File extraction helpers for PDF and DOCX resumes.
 """
+import io
 
 
-def extract_text_from_pdf(file) -> str:
-    """Extract all text from an uploaded PDF file object."""
-    text = ""
-    file_bytes = file.read()
+def extract_text_from_pdf(uploaded_file) -> str:
+    """
+    Extract text from a Streamlit UploadedFile PDF.
+    Reads bytes ONCE, tries 3 libraries in order.
+    """
+    try:
+        file_bytes = uploaded_file.read()
+    except Exception:
+        file_bytes = uploaded_file.getvalue()
 
-    # Method 1: pdfplumber (best for text-based PDFs)
+    if not file_bytes:
+        return ""
+
+    # ── Method 1: pdfplumber
     try:
         import pdfplumber
-        import io
         with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
-            pages_text = []
-            for page in pdf.pages:
-                t = page.extract_text()
-                if t:
-                    pages_text.append(t)
-            text = "\n".join(pages_text)
-        if text.strip():
+            pages = [p.extract_text() or "" for p in pdf.pages]
+        text = "\n".join(pages).strip()
+        if text:
             return text
     except Exception:
         pass
 
-    # Method 2: PyPDF2 fallback
+    # ── Method 2: PyPDF2
     try:
         import PyPDF2
-        import io
         reader = PyPDF2.PdfReader(io.BytesIO(file_bytes))
-        pages_text = []
-        for page in reader.pages:
-            t = page.extract_text()
-            if t:
-                pages_text.append(t)
-        text = "\n".join(pages_text)
-        if text.strip():
+        pages = [page.extract_text() or "" for page in reader.pages]
+        text = "\n".join(pages).strip()
+        if text:
             return text
     except Exception:
         pass
 
-    # Method 3: PyMuPDF fallback
+    # ── Method 3: pymupdf (fitz)
     try:
         import fitz
-        import io
         doc = fitz.open(stream=file_bytes, filetype="pdf")
-        pages_text = [page.get_text() for page in doc]
-        text = "\n".join(pages_text)
-        if text.strip():
+        pages = [page.get_text() for page in doc]
+        text = "\n".join(pages).strip()
+        if text:
             return text
     except Exception:
         pass
 
-    return text
+    return ""
 
 
-def extract_text_from_docx(file) -> str:
-    """Extract all text from an uploaded DOCX file object."""
+def extract_text_from_docx(uploaded_file) -> str:
+    """Extract text from a Streamlit UploadedFile DOCX."""
+    try:
+        file_bytes = uploaded_file.read()
+    except Exception:
+        file_bytes = uploaded_file.getvalue()
+
     try:
         import docx
-        doc = docx.Document(file)
-        paragraphs = [p.text for p in doc.paragraphs]
+        doc = docx.Document(io.BytesIO(file_bytes))
+        parts = [p.text for p in doc.paragraphs]
         for table in doc.tables:
             for row in table.rows:
                 for cell in row.cells:
-                    paragraphs.append(cell.text)
-        return "\n".join(paragraphs)
+                    parts.append(cell.text)
+        return "\n".join(parts).strip()
     except Exception as e:
-        return f"[Error reading DOCX: {e}]"
+        return ""
