@@ -22,7 +22,6 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [Deployment](#deployment)
-- [Future Improvements](#future-improvements)
 - [Author](#author)
 
 ---
@@ -209,17 +208,7 @@ Your app will be live in 2–3 minutes at a public URL.
 
 ---
 
-## 🔮 Future Improvements
 
-- [ ] Named Entity Recognition (NER) using spaCy for better name/company extraction
-- [ ] Sentence-BERT for semantic similarity beyond keyword matching
-- [ ] Support for bulk resume ZIP upload
-- [ ] ATS-style scoring rubric (location, salary, visa status)
-- [ ] Database integration for persistent candidate tracking
-- [ ] Multi-language resume support
-- [ ] Email integration to notify shortlisted candidates automatically
-
----
 
 ## 👩‍💻 Author
 
